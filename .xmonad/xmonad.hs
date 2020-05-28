@@ -8,7 +8,6 @@ import qualified Data.Map as M
 import Data.List
 import Graphics.X11.ExtraTypes.XF86
 import XMonad.Actions.CycleWS
-import XMonad.Layout.NoBorders
 import XMonad.Hooks.ManageHelpers
 import qualified XMonad.Layout.Fullscreen as FS
 import XMonad.Util.Run(spawnPipe)
@@ -19,6 +18,7 @@ import qualified XMonad.StackSet as W
 
 import XMonad.Hooks.EwmhDesktops (ewmh, fullscreenEventHook)
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.SetWMName
 import XMonad.Config.Desktop
 import XMonad.Util.SpawnOnce
 import XMonad.Util.EZConfig
@@ -28,7 +28,7 @@ myTerminal      = "alacritty"
 myFocusFollowsMouse = False
 myClickJustFocuses = False
 
-myModMask       = mod4Mask -- or mod4Mask for super
+myModMask       = mod4Mask -- or mod1Mask for alt
 myWorkspaces    = ["term", "browser", "discord", "games", "work", "6", "7", "8", "9"]
 
 myLayout = avoidFloats tiled ||| avoidFloats (Mirror tiled) ||| avoidFloats Full
@@ -46,36 +46,22 @@ myLayout = avoidFloats tiled ||| avoidFloats (Mirror tiled) ||| avoidFloats Full
      delta   = 3/100
 
 myManageHook = composeAll
-	[ className =? "firefox" 	--> doShift "browser"
+	[ className =? "Firefox" 	--> doShift "browser"
 	, className =? "discord" 	--> doShift "discord"
-	, className =? "alacritty" 	--> doShift "term"
+	, className =? "Alacritty" 	--> doShift "term"
 	]
 
-------------------------------------------------------------------------
--- Window rules:
-
--- Execute arbitrary actions and WindowSet manipulations when managing
--- a new window. You can use this to, for example, always float a
--- particular program, or have a client always appear on a particular
--- workspace.
---
--- To find the property name associated with a program, use
--- > xprop | grep WM_CLASS
--- and click on the client you're interested in.
---
--- To match on the WM_NAME, you can use 'title' in the same way that
--- 'className' and 'resource' are used below.
---
-myStartupHook = do
-	spawnOnce "$HOME/.config/polybar/launch.sh"
-	spawnOnce "/usr/bin/firefox"
-	spawnOnce "/usr/bin/discord"
-	spawnOnce "/usr/bin/alacritty"
-
+myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
+    [ ((0, xK_Print), (spawn "flameshot full -c"))
+    , ((0, xF86XK_AudioMute), spawn "amixer -D pulse set Master 1+ toggle")
+    , ((0, xF86XK_AudioLowerVolume), spawn "amixer set 'Master' 2%-")
+    , ((0, xF86XK_AudioRaiseVolume), spawn "amixer set 'Master' 2%+")    
+    , ((controlMask, xK_Print), (spawn "flameshot gui"))
+    ]
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 main = do
-    xmonad $ desktopConfig {
+    xmonad $ ewmh $ desktopConfig {
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
         clickJustFocuses   = myClickJustFocuses,
@@ -83,7 +69,14 @@ main = do
         modMask            = myModMask,
 	manageHook	   = myManageHook,
         workspaces         = myWorkspaces,
-        layoutHook         = desktopLayoutModifiers $ noBorders $ myLayout,
+        keys               = \c -> myKeys c `M.union` keys XMonad.def c,
+        layoutHook         = desktopLayoutModifiers $ myLayout,
         handleEventHook    = fullscreenEventHook <+> handleEventHook desktopConfig,
-	startupHook        = myStartupHook <+> startupHook desktopConfig
+	startupHook	   = do
+		spawn "xmobar -x 0"
+		spawn "firefox"
+		spawn "/usr/bin/discord"
+		spawn "alacritty"
+		spawn "feh --bg-scale ~/.xmonad/wallpaper.jpg"
+		setWMName "LG3D"
     }
