@@ -1,47 +1,65 @@
-set nocompatible
+if $VIM_PLUGINS != 'NO'
+  if filereadable(expand('~/.vimbundle'))
+    source ~/.vimbundle
+  endif
+  runtime! ftplugin/man.vim
+endif
 
-let g:racer_cmd = "/home/epixors/.cargo/bin/racer"
+syntax on
+filetype plugin indent on
 
-let g:racer_experimental_completer = 1
-let g:netrw_liststyle = 3
-let g:netrw_banner = 0
-let g:netrw_browse_split = 3
-let g:netrw_winsize = 25
-let g:netrw_list_hide = '.*\.swp$,\~$,\.orig$'
+set ignorecase
+set smartcase
+set number
 
-execute pathogen#infect()
+set visualbell
 
-filetype plugin on
-syntax enable
+set wildmenu
+set wildmode=list:longest,full
+
+set splitright
+set splitbelow
 
 set hidden
 
-set path+=**
-set wildignore+=node_modules/**
-set wildignore+=vendor/**
-set wildignore+=contrib/**
-set wildmenu
+set guifont=Monaco:h16
+set guioptions-=T guioptions-=e guioptions-=L guioptions-=r
+set shell=bash
 
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-
-let base16colorspace=256  " Access colors present in 256 colorspace
-colorscheme base16-default-dark
-
-augroup Racer
-    autocmd!
-    autocmd FileType rust nmap <buffer> gd         <Plug>(rust-def)
-    autocmd FileType rust nmap <buffer> gs         <Plug>(rust-def-split)
-    autocmd FileType rust nmap <buffer> gx         <Plug>(rust-def-vertical)
-    autocmd FileType rust nmap <buffer> <leader>gd <Plug>(rust-doc)
+augroup vimrc
+  autocmd!
+  autocmd GuiEnter * set columns=120 lines=70 number
 augroup END
 
-nnoremap <silent> <leader>] :cnext<CR>  
-nnoremap <silent> <leader>[ :cprevious<CR>
-nnoremap <silent> <leader>p :lcd %:p:h<CR>
+" shows the output from prettier - useful for syntax errors
+nnoremap <leader>pt :!prettier %<CR>
+
+" Plugin Configuration: {{{
+
+  " ALE: {{{
+    let g:ale_sign_error = 'X'
+    let g:ale_sign_warning = '!'
+    highlight link ALEWarningSign ErrorMsg
+    highlight link ALEErrorSign WarningMsg
+    nnoremap <silent> <leader>ne :ALENextWrap<CR>
+    nnoremap <silent> <leader>pe :ALEPreviousWrap<CR>
+
+    let g:ale_fixers = {
+          \   'bash': ['shfmt'],
+          \   'elixir': ['mix_format'],
+          \   'javascript': ['prettier'],
+          \   'javascript.jsx': ['prettier'],
+          \   'json': ['prettier'],
+          \   'ruby': ['rubocop'],
+          \   'scss': ['prettier'],
+          \   'zsh': ['shfmt'],
+          \}
+
+    let g:ale_fix_on_save = 1
+  " }}}
+
+" }}}
+
+if filereadable(expand('~/.vimrc.local'))
+  source ~/.vimrc.local
+endif

@@ -1,0 +1,12 @@
+eval "$(/home/epixors/checkouts/git/dotmatrix/hr/bin/hr init -)"
+
+HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
+SAVEHIST=5000
+HISTSIZE=2000
+
+plugins=(zsh-autosuggestions)
+
+alias vpn='sudo openvpn --config ~/client.ovpn'
+export CHROME_BIN=/usr/bin/chromium-browser
+
+eval "$(starship init zsh)"

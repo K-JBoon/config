@@ -66,6 +66,8 @@ main = do
         focusFollowsMouse  = myFocusFollowsMouse,
         clickJustFocuses   = myClickJustFocuses,
         borderWidth        = 0,
+	normalBorderColor  = "#555555",
+	focusedBorderColor = "#c60f7b",
         modMask            = myModMask,
 	manageHook	   = myManageHook,
         workspaces         = myWorkspaces,
@@ -73,10 +75,12 @@ main = do
         layoutHook         = desktopLayoutModifiers $ myLayout,
         handleEventHook    = fullscreenEventHook <+> handleEventHook desktopConfig,
 	startupHook	   = do
-		spawn "xmobar -x 0"
+		spawn "xrandr --output DP-0 -right-of HDMI-0 --rotate normal"
+		spawn "xrandr --output DP-4 --rotate left --right-of DP-0"
 		spawn "firefox"
 		spawn "/usr/bin/discord"
 		spawn "alacritty"
-		spawn "feh --bg-scale ~/.xmonad/wallpaper.jpg"
+		spawn "wget -O - -q reddit.com/r/earthporn.json | jq '.data.children[] |.data.url' | awk '/[.][a-z]+\"$/{print}' | head -n3 | xargs feh --bg-fill"
+		spawn "pactl set-default-sink alsa_output.pci-0000_00_1f.3.analog-stereo"
 		setWMName "LG3D"
     }
